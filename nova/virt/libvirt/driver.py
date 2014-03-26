@@ -3525,7 +3525,8 @@ class LibvirtDriver(driver.ComputeDriver):
 
         if power_on:
             try:
-                domain.createWithFlags(launch_flags)
+                #domain.createWithFlags(launch_flags)
+                domain.create()
             except Exception as e:
                 with excutils.save_and_reraise_exception():
                     LOG.error(_("An error occurred while trying to launch a "
@@ -3640,7 +3641,7 @@ class LibvirtDriver(driver.ComputeDriver):
                 self.cleanup(context, instance, network_info=network_info,
                              block_device_info=block_device_info)
                 raise exception.VirtualInterfaceCreateException()
-        domain.resume()
+        #domain.resume()
         return domain
 
     def get_all_block_devices(self):

@@ -126,7 +126,7 @@ libvirt_opts = [
     cfg.StrOpt('virt_type',
                default='kvm',
                help='Libvirt domain type (valid options are: '
-                    'kvm, lxc, qemu, uml, xen)',
+                    'kvm, lxc, qemu, uml, xen, bhyve)',
                deprecated_group='DEFAULT',
                deprecated_name='libvirt_type'),
     cfg.StrOpt('connection_uri',
@@ -734,6 +734,8 @@ class LibvirtDriver(driver.ComputeDriver):
             uri = CONF.libvirt.connection_uri or 'xen:///'
         elif CONF.libvirt.virt_type == 'lxc':
             uri = CONF.libvirt.connection_uri or 'lxc:///'
+        elif CONF.libvirt.virt_type == 'bhyve':
+            uri = CONF.libvirt.connection_uri or 'bhyve:///system'
         else:
             uri = CONF.libvirt.connection_uri or 'qemu:///system'
         return uri
@@ -4007,6 +4009,12 @@ class LibvirtDriver(driver.ComputeDriver):
 
         :returns: a list of the assignable pci devices information
         """
+
+        # TODO: Remove this once libvirt's 'listDevices' method is available on
+        # freebsd platforms.
+        if sys.platform.startswith('freebsd'):
+            return '{}'
+
         pci_info = []
 
         dev_names = self._conn.listDevices('pci', 0) or []

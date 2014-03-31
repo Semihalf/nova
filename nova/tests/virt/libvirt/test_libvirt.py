@@ -3462,12 +3462,17 @@ class LibvirtConnTestCase(test.TestCase):
                         'xen': ('xen:///',
                              [(lambda t: t.find('.').get('type'), 'xen'),
                               (lambda t: t.find('./os/type').text,
-                               xen_vm_mode)])}
+                               xen_vm_mode)]),
+                        'bhyve': ('bhyve:///system',
+                             [(lambda t: t.find('.').get('type'), 'bhyve'),
+                              (lambda t: t.find('./os/type').text,
+                               vm_mode.HVM),
+                              (lambda t: t.find('./devices/emulator'), None)])}
 
         if expect_xen_hvm or xen_only:
             hypervisors_to_check = ['xen']
         else:
-            hypervisors_to_check = ['qemu', 'kvm', 'xen']
+            hypervisors_to_check = ['qemu', 'kvm', 'xen', 'bhyve']
 
         for hypervisor_type in hypervisors_to_check:
             check_list = type_uri_map[hypervisor_type][1]
@@ -3487,7 +3492,7 @@ class LibvirtConnTestCase(test.TestCase):
             # should not produce configuration that results in kernel
             # arguments
             if not expect_kernel and (hypervisor_type in
-                                      ['qemu', 'kvm', 'xen']):
+                                      ['qemu', 'kvm', 'xen', 'bhyve']):
                 check = (lambda t: t.find('./os/root'), None)
                 check_list.append(check)
                 check = (lambda t: t.find('./os/cmdline'), None)

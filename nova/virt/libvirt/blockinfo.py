@@ -201,6 +201,7 @@ def is_disk_bus_valid_for_virt(virt_type, disk_bus):
         'xen': ['xen', 'ide'],
         'uml': ['uml'],
         'lxc': ['lxc'],
+        'bhyve': ['virtio', 'ide'],
         }
 
     if virt_type not in valid_bus:
@@ -245,7 +246,7 @@ def get_disk_bus_for_device_type(virt_type,
             return "ide"
         elif device_type == "disk":
             return "xen"
-    elif virt_type in ("qemu", "kvm"):
+    elif virt_type in ("qemu", "kvm", "bhyve"):
         if device_type == "cdrom":
             arch = libvirt_utils.get_arch(image_meta)
             if arch in ("ppc", "ppc64"):

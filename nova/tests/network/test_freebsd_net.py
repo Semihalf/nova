@@ -197,9 +197,42 @@ class FreeBSDNetworkTestCase(test.NoDBTestCase):
         self.mox.StubOutWithMock(self.driver, '_delete_ip_from_list')
         self.mox.StubOutWithMock(self.driver, '_add_ip_from_list')
 
+        self.driver._device_exists('br100').AndReturn(False)
+        self.driver._execute('ifconfig', 'bridge', 'create', check_exit_code=0,
+                             run_as_root=True).AndReturn(('bridge0', ''))
+        self.driver._execute('ifconfig', 'bridge0', 'name', 'br100',
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', 'br100', 'up', check_exit_code=0,
+                             run_as_root=True)
+        self.driver._device_is_bridge_member('br100', 'em0').AndReturn(False)
+        self.driver._execute('ifconfig', 'br100', 'addm', 'em0',
+                             check_exit_code=0, run_as_root=True)
+        self.driver._execute('ifconfig', 'em0', 'up', check_exit_code=0,
+                             run_as_root=True)
+        self.driver._route_list('em0')
+        self.driver._delete_routes_from_list(mox.IgnoreArg())
+        self.driver._ip_list(mox.IgnoreArg())
+        self.driver._delete_ip_from_list(mox.IgnoreArg(), mox.IgnoreArg())
+        self.driver._add_ip_from_list(mox.IgnoreArg(), mox.IgnoreArg())
+        self.driver._add_routes_from_list(mox.IgnoreArg())
+
+        self.mox.ReplayAll()
+        self.driver.FreeBSDBridgeInterfaceDriver.ensure_bridge('br100', 'em0')
+
+    def test_ensure_bridge_no_bridge_exists_same_name(self):
+        self.mox.StubOutWithMock(self.driver, '_device_exists')
+        self.mox.StubOutWithMock(self.driver, '_execute')
+        self.mox.StubOutWithMock(self.driver, '_device_is_bridge_member')
+        self.mox.StubOutWithMock(self.driver, '_route_list')
+        self.mox.StubOutWithMock(self.driver, '_delete_routes_from_list')
+        self.mox.StubOutWithMock(self.driver, '_add_routes_from_list')
+        self.mox.StubOutWithMock(self.driver, '_ip_list')
+        self.mox.StubOutWithMock(self.driver, '_delete_ip_from_list')
+        self.mox.StubOutWithMock(self.driver, '_add_ip_from_list')
+
         self.driver._device_exists('bridge0').AndReturn(False)
-        self.driver._execute('ifconfig', 'bridge0', 'create',
-                     check_exit_code=0, run_as_root=True)
+        self.driver._execute('ifconfig', 'bridge', 'create', check_exit_code=0,
+                             run_as_root=True).AndReturn(('bridge0', ''))
         self.driver._execute('ifconfig', 'bridge0', 'up', check_exit_code=0,
                              run_as_root=True)
         self.driver._device_is_bridge_member('bridge0', 'em0').AndReturn(False)
@@ -230,6 +263,44 @@ class FreeBSDNetworkTestCase(test.NoDBTestCase):
         self.assertEqual(True, exists)
         exists = self.driver._device_exists('eth0')
         self.assertEqual(False, exists)
+
+    def test_create_tap_dev(self):
+        self.mox.StubOutWithMock(self.driver, '_execute')
+        self.mox.StubOutWithMock(self.driver, '_device_exists')
+
+        dev_name = 'tapA1B2C3'
+        mac = '00:01:02:03:04:05'
+
+        self.driver._device_exists(dev_name).AndReturn(False)
+        self.driver._execute('ifconfig', 'tap', 'create', run_as_root=True,
+                             check_exit_code=0).AndReturn(('tap0', ''))
+        self.driver._execute('ifconfig', 'tap0', 'name', dev_name,
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'ether', mac,
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'up', run_as_root=True,
+                             check_exit_code=0)
+
+        self.mox.ReplayAll()
+        self.driver.create_tap_dev(dev_name, mac)
+
+    def test_create_tap_dev_same_name(self):
+        self.mox.StubOutWithMock(self.driver, '_execute')
+        self.mox.StubOutWithMock(self.driver, '_device_exists')
+
+        dev_name = 'tap0'
+        mac = '00:01:02:03:04:05'
+
+        self.driver._device_exists(dev_name).AndReturn(False)
+        self.driver._execute('ifconfig', 'tap', 'create', run_as_root=True,
+                             check_exit_code=0).AndReturn(('tap0', ''))
+        self.driver._execute('ifconfig', dev_name, 'ether', mac,
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'up', run_as_root=True,
+                             check_exit_code=0)
+
+        self.mox.ReplayAll()
+        self.driver.create_tap_dev(dev_name, mac)
 
     def test_device_is_bridge_member(self):
         ifconfig_out = (

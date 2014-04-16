@@ -212,8 +212,11 @@ def create_tap_dev(dev, mac_address=None):
     """Create a tap device"""
     if not _device_exists(dev):
         try:
-            _execute(*_ifconfig_cmd(dev, ['create']), run_as_root=True,
-                     check_exit_code=0)
+            name, _ = _execute(*_ifconfig_cmd('tap', ['create']),
+                               run_as_root=True, check_exit_code=0)
+            if name != dev:
+                _execute(*_ifconfig_cmd(name, ['name', dev]), run_as_root=True,
+                         check_exit_code=0)
         except processutils.ProcessExecutionError:
             with excutils.save_and_reraise_exception():
                 LOG.error(_("Failed creating device: '%s'"), dev)
@@ -354,8 +357,11 @@ class FreeBSDBridgeInterfaceDriver(FreeBSDNetInterfaceDriver):
         """
         if not _device_exists(bridge):
             LOG.debug(_('Starting Bridge %s'), bridge)
-            _execute(*_ifconfig_cmd(bridge, ['create']), run_as_root=True,
-                     check_exit_code=0)
+            name, err = _execute(*_ifconfig_cmd('bridge', ['create']),
+                                 run_as_root=True, check_exit_code=0)
+            if name != bridge:
+                _execute(*_ifconfig_cmd(name, ['name', bridge]),
+                         run_as_root=True, check_exit_code=0)
             _execute(*_ifconfig_cmd(bridge, ['up']), run_as_root=True,
                      check_exit_code=0)
 

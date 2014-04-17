@@ -530,6 +530,7 @@ class Connection(object):
                          'qemu:///session',
                          'xen:///system',
                          'uml:///system',
+                         'bhyve:///system',
                          'test:///default']
 
         if uri not in uri_whitelist:

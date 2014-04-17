@@ -3278,6 +3278,9 @@ class LibvirtDriver(driver.ComputeDriver):
             consolepty = vconfig.LibvirtConfigGuestSerial()
             consolepty.type = "pty"
             guest.add_device(consolepty)
+        elif CONF.libvirt.virt_type == "bhyve":
+            # TODO(md): add support for bhyve console (nmdm only at the moment)
+            pass
         else:
             consolepty = vconfig.LibvirtConfigGuestConsole()
             consolepty.type = "pty"

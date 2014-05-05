@@ -214,6 +214,7 @@ def create_tap_dev(dev, mac_address=None):
         try:
             name, _ = _execute(*_ifconfig_cmd('tap', ['create']),
                                run_as_root=True, check_exit_code=0)
+            name = name.rstrip()
             if name != dev:
                 _execute(*_ifconfig_cmd(name, ['name', dev]), run_as_root=True,
                          check_exit_code=0)

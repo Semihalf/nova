@@ -360,6 +360,7 @@ class FreeBSDBridgeInterfaceDriver(FreeBSDNetInterfaceDriver):
             LOG.debug(_('Starting Bridge %s'), bridge)
             name, err = _execute(*_ifconfig_cmd('bridge', ['create']),
                                  run_as_root=True, check_exit_code=0)
+            name = name.rstrip()
             if name != bridge:
                 _execute(*_ifconfig_cmd(name, ['name', bridge]),
                          run_as_root=True, check_exit_code=0)

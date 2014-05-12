@@ -302,6 +302,28 @@ class FreeBSDNetworkTestCase(test.NoDBTestCase):
         self.mox.ReplayAll()
         self.driver.create_tap_dev(dev_name, mac)
 
+    def test_create_tap_dev_promisc(self):
+        self.mox.StubOutWithMock(self.driver, '_execute')
+        self.mox.StubOutWithMock(self.driver, '_device_exists')
+
+        dev_name = 'tapA1B2C3'
+        mac = '00:01:02:03:04:05'
+
+        self.driver._device_exists(dev_name).AndReturn(False)
+        self.driver._execute('ifconfig', 'tap', 'create', run_as_root=True,
+                             check_exit_code=0).AndReturn(('tap0', ''))
+        self.driver._execute('ifconfig', 'tap0', 'name', dev_name,
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'ether', mac,
+                             run_as_root=True, check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'up', run_as_root=True,
+                             check_exit_code=0)
+        self.driver._execute('ifconfig', dev_name, 'promisc', run_as_root=True,
+                             check_exit_code=0)
+
+        self.mox.ReplayAll()
+        self.driver.create_tap_dev(dev_name, mac, True)
+
     def test_device_is_bridge_member(self):
         ifconfig_out = (
             'bridge0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> '

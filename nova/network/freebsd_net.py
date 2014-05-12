@@ -208,7 +208,7 @@ def ensure_metadata_ip():
              run_as_root=True, check_exit_code=0)
 
 
-def create_tap_dev(dev, mac_address=None):
+def create_tap_dev(dev, mac_address=None, promisc=False):
     """Create a tap device"""
     if not _device_exists(dev):
         try:
@@ -229,6 +229,10 @@ def create_tap_dev(dev, mac_address=None):
 
         _execute(*_ifconfig_cmd(dev, ['up']), run_as_root=True,
                  check_exit_code=0)
+
+        if promisc:
+            _execute(*_ifconfig_cmd(dev, ['promisc']), run_as_root=True,
+                     check_exit_code=0)
 
 
 def delete_net_dev(dev):

@@ -37,6 +37,7 @@ VIF_TYPE_BRIDGE = 'bridge'
 VIF_TYPE_802_QBG = '802.1qbg'
 VIF_TYPE_802_QBH = '802.1qbh'
 VIF_TYPE_MLNX_DIRECT = 'mlnx_direct'
+VIF_TYPE_VHOSTUSER = 'vhostuser'
 VIF_TYPE_OTHER = 'other'
 
 # Constant for max length of network interface names
@@ -234,6 +235,7 @@ class VIF(Model):
     def __init__(self, id=None, address=None, network=None, type=None,
                  devname=None, ovs_interfaceid=None,
                  qbh_params=None, qbg_params=None,
+                 vhostuser_mode=None, vhostuser_path=None,
                  **kwargs):
         super(VIF, self).__init__()
 
@@ -246,6 +248,8 @@ class VIF(Model):
         self['ovs_interfaceid'] = ovs_interfaceid
         self['qbh_params'] = qbh_params
         self['qbg_params'] = qbg_params
+        self['vhostuser_path'] = vhostuser_path
+        self['vhostuser_mode'] = vhostuser_mode
 
         self._set_meta(kwargs)
 

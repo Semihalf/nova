@@ -37,6 +37,7 @@ VIF_TYPE_802_QBG = '802.1qbg'
 VIF_TYPE_802_QBH = '802.1qbh'
 VIF_TYPE_MLNX_DIRECT = 'mlnx_direct'
 VIF_TYPE_MIDONET = 'midonet'
+VIF_TYPE_VHOSTUSER = 'vhostuser'
 VIF_TYPE_OTHER = 'other'
 
 # Constants for dictionary keys in the 'vif_details' field in the VIF
@@ -261,6 +262,7 @@ class VIF(Model):
     def __init__(self, id=None, address=None, network=None, type=None,
                  details=None, devname=None, ovs_interfaceid=None,
                  qbh_params=None, qbg_params=None, active=False,
+                 vhostuser_mode=None, vhostuser_path=None,
                  **kwargs):
         super(VIF, self).__init__()
 
@@ -275,13 +277,15 @@ class VIF(Model):
         self['qbh_params'] = qbh_params
         self['qbg_params'] = qbg_params
         self['active'] = active
+        self['vhostuser_path'] = vhostuser_path
+        self['vhostuser_mode'] = vhostuser_mode
 
         self._set_meta(kwargs)
 
     def __eq__(self, other):
         keys = ['id', 'address', 'network', 'type', 'details', 'devname',
                 'ovs_interfaceid', 'qbh_params', 'qbg_params',
-                'active']
+                'active', 'vhostuser_path', 'vhostuser_mode']
         return all(self[k] == other[k] for k in keys)
 
     def __ne__(self, other):

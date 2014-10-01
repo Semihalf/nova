@@ -1699,3 +1699,37 @@ class LibvirtConfigGuestWatchdogTest(LibvirtConfigBaseTest):
 
         xml = obj.to_xml()
         self.assertXmlEqual(xml, "<watchdog model='i6300esb' action='reset'/>")
+
+
+class LibvirtConfigGuestMemoryBackingTest(LibvirtConfigBaseTest):
+
+    def test_config_use_huge_pages(self):
+        obj = config.LibvirtConfigGuestMemoryBacking()
+
+        xml = obj.to_xml()
+        self.assertXmlEqual("""
+            <memoryBacking>
+                <hugepages/>
+            </memoryBacking>""", xml)
+
+    def test_config_nosharepages(self):
+        obj = config.LibvirtConfigGuestMemoryBacking()
+        obj.nosharepages = True
+
+        xml = obj.to_xml()
+        self.assertXmlEqual("""
+            <memoryBacking>
+                <hugepages/>
+                <nosharepages/>
+            </memoryBacking>""", xml)
+
+    def test_config_locked(self):
+        obj = config.LibvirtConfigGuestMemoryBacking()
+        obj.locked = True
+        obj.use_hugepages = False
+
+        xml = obj.to_xml()
+        self.assertXmlEqual("""
+            <memoryBacking>
+                <locked/>
+            </memoryBacking>""", xml)

@@ -2089,6 +2089,19 @@ class LibvirtConnTestCase(test.TestCase):
                    group='spice')
         self._test_get_guest_config_ppc64(8)
 
+    def test_get_guest_config_memory_backing(self):
+        self.flags(use_huge_pages=True, group='libvirt')
+        conn = libvirt_driver.LibvirtDriver(fake.FakeVirtAPI(), True)
+        instance_ref = db.instance_create(self.context, self.test_instance)
+
+        disk_info = blockinfo.get_disk_info(CONF.libvirt.virt_type,
+                                            instance_ref)
+        conf = conn.get_guest_config(instance_ref,
+                                     _fake_network_info(self.stubs, 1),
+                                     None, disk_info)
+        self.assertIsInstance(conf.memory_backing,
+                              vconfig.LibvirtConfigGuestMemoryBacking)
+
     def test_get_guest_cpu_config_none(self):
         self.flags(cpu_mode="none", group='libvirt')
         conn = libvirt_driver.LibvirtDriver(fake.FakeVirtAPI(), True)

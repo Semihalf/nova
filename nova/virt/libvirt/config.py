@@ -1147,6 +1147,7 @@ class LibvirtConfigGuest(LibvirtConfigObject):
         self.uuid = None
         self.name = None
         self.memory = 500 * units.Mi
+        self.memory_backing = None
         self.vcpus = 1
         self.cpuset = None
         self.cpu = None
@@ -1240,6 +1241,9 @@ class LibvirtConfigGuest(LibvirtConfigObject):
         root.set("type", self.virt_type)
 
         self._format_basic_props(root)
+
+        if self.memory_backing is not None:
+            root.append(self.memory_backing.format_dom())
 
         if self.sysinfo is not None:
             root.append(self.sysinfo.format_dom())
@@ -1426,3 +1430,36 @@ class LibvirtConfigGuestRng(LibvirtConfigGuestDevice):
         dev.append(backend)
 
         return dev
+
+class LibvirtConfigGuestMemoryBacking(LibvirtConfigObject):
+
+    def __init__(self, **kwargs):
+        super(LibvirtConfigGuestMemoryBacking, self).__init__(
+            root_name="memoryBacking", **kwargs)
+
+        self.use_hugepages = True
+        self.hugepages_config = None
+        self.nosharepages = False
+        self.locked = False
+
+    def _set_hugepages_config(self):
+        # TODO
+        pass
+
+    def format_dom(self):
+        memory_backend = super(LibvirtConfigGuestMemoryBacking,
+                               self).format_dom()
+        if self.use_hugepages:
+            hugepages = etree.Element("hugepages")
+            self._set_hugepages_config()
+            memory_backend.append(hugepages)
+
+        if self.nosharepages:
+            noshare = etree.Element("nosharepages")
+            memory_backend.append(noshare)
+
+        if self.locked:
+            locked = etree.Element("locked")
+            memory_backend.append(locked)
+
+        return memory_backend

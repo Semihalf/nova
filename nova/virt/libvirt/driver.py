@@ -257,6 +257,9 @@ libvirt_opts = [
                 help='A path to a device that will be used as source of '
                      'entropy on the host. Permitted options are: '
                      '/dev/random or /dev/hwrng'),
+    cfg.BoolOpt('use_huge_pages',
+                default=False,
+                help='Use hugepages for backing the guest memory by the host'),
     ]
 
 CONF = cfg.CONF
@@ -3129,6 +3132,10 @@ class LibvirtDriver(driver.ComputeDriver):
         guest.uuid = instance['uuid']
         # We are using default unit for memory: KiB
         guest.memory = flavor.memory_mb * units.Ki
+
+        if CONF.libvirt.use_huge_pages:
+            guest.memory_backing = vconfig.LibvirtConfigGuestMemoryBacking()
+
         guest.vcpus = flavor.vcpus
         guest.cpuset = CONF.vcpu_pin_set
 
